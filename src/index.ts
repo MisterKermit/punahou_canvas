@@ -1,32 +1,64 @@
-import { Application, Assets, Sprite } from 'pixi.js';
+import {
+  Application,
+  Assets,
+  Container,
+  FederatedPointerEvent,
+  Graphics,
+  Sprite,
+} from "pixi.js";
+
 
 // Asynchronous IIFE
-(async () =>
-{
-    // Create a PixiJS application.
-    const app = new Application();
+(async () => {
+  // Create a PixiJS application.
+  const app = new Application();
 
-    // Intialize the application.
-    await app.init({ background: '#1099bb', resizeTo: window });
+  // Intialize the application.
+  await app.init({ background: "#1099bb", resizeTo: window });
 
-    app.canvas.style.position = 'absolute';
+  // you should close the live share server
+  app.canvas.style.position = "absolute";
 
-    // Then adding the application's canvas to the DOM body.
-    document.body.appendChild(app.canvas);
+  // Add user data later
+  const pixels = [
+    [
+    ]
+  ]
 
-    // Load the bunny texture.
-    const texture = await Assets.load('https://pixijs.com/assets/bunny.png');
+  const board = new Container();
+  new Graphics().uid
+  board.addChild(
+    new Graphics()
+      .rect(0, 0, app.screen.width, app.screen.height)
+      .fill(0xffffff)
+  );
 
-    // Create a new Sprite from an image path
-    const bunny = new Sprite(texture);
+  // container.position.add()
 
-    // Add to stage
-    app.stage.addChild(bunny);
+  app.stage.addChild(board);
 
-    // Center the sprite's anchor point
-    bunny.anchor.set(0.5);
+  app.stage.interactive = true;
+  board.eventMode = "static";
+  board.cursor = "pointer";
 
-    // Move the sprite to the center of the screen
-    bunny.x = app.screen.width / 2;
-    bunny.y = app.screen.height / 2;
+  // Then adding the application's canvas to the DOM body.
+  document.body.appendChild(app.canvas);
+
+  app.stage.on("pointerdown", onDragStart);
+  app.stage.on("pointerup", onDragEnd);
+  app.stage.on("pointerupoutside", onDragEnd);
+
+  function onDragMove(event: FederatedPointerEvent) {
+    board.x += event.movementX;
+    board.y += event.movementY;
+    event;
+  }
+
+  function onDragStart() {
+    app.stage.on("pointermove", onDragMove);
+  }
+
+  function onDragEnd() {
+    app.stage.off("pointermove", onDragMove);
+  }
 })();
