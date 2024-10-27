@@ -3,37 +3,66 @@ import {
   Assets,
   Container,
   FederatedPointerEvent,
+  FederatedWheelEvent,
   Graphics,
   Sprite,
 } from "pixi.js";
 
+import { Pixel, PixelMatrix } from "./pixel";
 
 // Asynchronous IIFE
 (async () => {
   // Create a PixiJS application.
-  const app = new Application();
+  const app = new Application({
+    eventFeatures: {
+      wheel: true,
+    }
+  });
 
   // Intialize the application.
   await app.init({ background: "#1099bb", resizeTo: window });
 
+  
   // you should close the live share server
   app.canvas.style.position = "absolute";
 
   // Add user data later
-  const pixels = [
+  const pixels: PixelMatrix = [
     [
-    ]
-  ]
+      new Pixel(0xff0000, 100, 100),
+      new Pixel(0xff0000, 110, 100),
+      new Pixel(0xff0000, 120, 100),
+    ],
+    [
+      new Pixel(0xff0000, 100, 110),
+      new Pixel(0xff0000, 110, 110),
+      new Pixel(0xff0000, 120, 110),
+    ],
+    [
+      new Pixel(0xff0000, 100, 120),
+      new Pixel(0xff0000, 110, 120),
+      new Pixel(0xff0000, 120, 120),
+    ],
+  ];
 
   const board = new Container();
-  new Graphics().uid
-  board.addChild(
-    new Graphics()
-      .rect(0, 0, app.screen.width, app.screen.height)
-      .fill(0xffffff)
-  );
+  for (const pixelList of pixels) {
+    for (const pixel of pixelList) {
+      board.addChild(pixel.sprite);
+    }
+  }
+
+  // from here on out: oh the misery
 
   // container.position.add()
+
+  app.stage.on("wheel", (event: FederatedWheelEvent) => {
+    const center = board.height * 0.5;
+    board.pivot.set(center, center);
+    const toAdd = event.deltaY / 150;
+    board.scale.set(board.scale._x + toAdd, board.scale._y + toAdd)
+  });
+
 
   app.stage.addChild(board);
 

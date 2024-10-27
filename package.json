@@ -12,10 +12,12 @@
   "author": "Alyx, MisterKermit",
   "license": "MIT",
   "dependencies": {
+    "@types/uuid": "^10.0.0",
     "express": "^4.21.1",
     "lodash": "^4.17.21",
     "pixi.js": "^8.5.0",
-    "tailwindcss": "^3.4.13"
+    "tailwindcss": "^3.4.13",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "css-loader": "^7.1.2",
