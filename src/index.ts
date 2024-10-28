@@ -1,86 +1,103 @@
+import "./style.scss"
+
 import {
   Application,
-  Assets,
   Container,
   FederatedPointerEvent,
   FederatedWheelEvent,
   Graphics,
-  Sprite,
 } from "pixi.js";
 
 import { Pixel, PixelMatrix } from "./pixel";
+import { OutlineFilter } from "pixi-filters";
 
-// Asynchronous IIFE
 (async () => {
-  // Create a PixiJS application.
-  const app = new Application({
-    eventFeatures: {
-      wheel: true,
-    }
+  const app = new Application();
+  await app.init({ background: "#ffffff", resizeTo: window });
+
+  app.canvas.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
   });
 
-  // Intialize the application.
-  await app.init({ background: "#1099bb", resizeTo: window });
-
-  
-  // you should close the live share server
   app.canvas.style.position = "absolute";
 
-  // Add user data later
-  const pixels: PixelMatrix = [
-    [
-      new Pixel(0xff0000, 100, 100),
-      new Pixel(0xff0000, 110, 100),
-      new Pixel(0xff0000, 120, 100),
-    ],
-    [
-      new Pixel(0xff0000, 100, 110),
-      new Pixel(0xff0000, 110, 110),
-      new Pixel(0xff0000, 120, 110),
-    ],
-    [
-      new Pixel(0xff0000, 100, 120),
-      new Pixel(0xff0000, 110, 120),
-      new Pixel(0xff0000, 120, 120),
-    ],
-  ];
-
   const board = new Container();
-  for (const pixelList of pixels) {
-    for (const pixel of pixelList) {
-      board.addChild(pixel.sprite);
+
+  app.stage.addChild(new Graphics()
+    .rect(-5, -5, 10, 10)
+    .fill(0xff0000));
+
+  let selectedPixel: Pixel | null = null;
+  let oldZ: number | null = null;
+  const selectionCallback = (pixel: Pixel) => {
+    // Check if selected pixel exists
+    if (selectedPixel) {
+      selectedPixel.sprite.filters = [];
+      selectedPixel.sprite.zIndex = oldZ || 0;
     }
+
+    pixel.sprite.filters = [new OutlineFilter({
+      thickness: 2,
+      color: 0xffffff
+    })];
+    oldZ = pixel.sprite.zIndex;
+    pixel.sprite.zIndex = 100;
+
+    selectedPixel = pixel;
+  };
+
+  function randRange(min: number, max: number) {
+    return Math.random() * (max - min) + min;
   }
 
-  // from here on out: oh the misery
+  // Add user data later
+  const pixels: PixelMatrix = [];
+  const MATRIX_SIZE = 10;
+  for (let i = 0; i < MATRIX_SIZE; i++) {
+    const pixelList = [];
+    for (let j = 0; j < MATRIX_SIZE; j++) {
+      pixelList.push(new Pixel(randRange(0x000000, 0xffffff), j, i, board, null, selectionCallback));
+    }
+    pixels.push(pixelList);
+  }
 
-  // container.position.add()
+  board.x = (app.screen.width / 2) - (board.width / 2);
+  board.y = (app.screen.height / 2) - (board.height / 2);
 
-  app.stage.on("wheel", (event: FederatedWheelEvent) => {
-    const center = board.height * 0.5;
-    board.pivot.set(center, center);
-    const toAdd = event.deltaY / 150;
-    board.scale.set(board.scale._x + toAdd, board.scale._y + toAdd)
+  board.on("wheel", (event: FederatedWheelEvent) => {
+    const offsetX = (event.globalX - board.position.x) / board.width;
+    const offsetY = (event.globalY - board.position.y) / board.height;
+
+    const toAdd = event.deltaY / 100;
+    const x = Math.max(board.scale._x - toAdd, 0.5);
+    const y = Math.max(board.scale._y - toAdd, 0.5);
+    board.scale.set(x, y)
+
+    const newOffsetX = (event.globalX - board.position.x) / board.width;
+    const newOffsetY = (event.globalY - board.position.y) / board.height;
+    board.position.x += (newOffsetX - offsetX) * board.width;
+    board.position.y += (newOffsetY - offsetY) * board.height;
+
   });
 
 
   app.stage.addChild(board);
 
   app.stage.interactive = true;
-  board.eventMode = "static";
+  board.eventMode = "dynamic";
   board.cursor = "pointer";
 
   // Then adding the application's canvas to the DOM body.
   document.body.appendChild(app.canvas);
 
-  app.stage.on("pointerdown", onDragStart);
-  app.stage.on("pointerup", onDragEnd);
-  app.stage.on("pointerupoutside", onDragEnd);
+  app.stage.hitArea = app.screen;
+  app.stage.on("rightdown", onDragStart);
+  app.stage.on("rightup", onDragEnd);
+  app.stage.on("rightupoutside", onDragEnd);
 
   function onDragMove(event: FederatedPointerEvent) {
     board.x += event.movementX;
     board.y += event.movementY;
-    event;
   }
 
   function onDragStart() {

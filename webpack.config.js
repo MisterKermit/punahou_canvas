@@ -1,5 +1,4 @@
 const path = require("path");
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 module.exports = {
   mode: "development",
@@ -16,18 +15,14 @@ module.exports = {
       },
       {
         test: /\.tsx?$/,
-        use:  'ts-loader',
+        use: 'ts-loader',
         exclude: /node_modules/,
       },
     ],
   },
-resolve: {
+  resolve: {
     extensions: ['.tsx', '.ts', '.js']
   },
-//   plugins: [
-//     new BundleAnalyzerPlugin()
-//   ],
-
   devServer: {
     static: path.join(__dirname, 'dist'),
     port: 8080
