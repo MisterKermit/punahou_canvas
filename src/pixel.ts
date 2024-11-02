@@ -28,7 +28,7 @@ export class Pixel {
     this.x = x;
     this.y = y;
     this.sprite = this.createSquare(x, y);
-    this.color = color; // Make sure to assign this later because it relies on this.sprite
+    this.color = color; // Make sure to assign this later because it relies on this.sprite being set
     this.user = user;
     this.selectCallback = selectCallback;
 
@@ -50,11 +50,11 @@ export class Pixel {
     const SIZE = 10;
     return new Graphics()
       .rect(x * SIZE, y * SIZE, SIZE, SIZE)
-      .fill(this.color);
+      .fill(0xffffff);
   }
 
   private registerEvents() {
-    this.sprite.eventMode = "dynamic";
+    this.sprite.eventMode = "static";
     this.sprite.on("click", (_: FederatedPointerEvent) => {
       this.selectCallback(this);
     });
