@@ -23,6 +23,7 @@ export class Board {
   constructor(pixels: NetPixelMatrix, app: Application<Renderer>) {
     this.container = this.init(app.stage, app.screen);
     this.pixels = this.netPixelsToPixels(pixels);
+    this.resizeDefault();
   }
 
   public setPixel(netPixel: NetPixel, x: number, y: number): boolean {
@@ -44,15 +45,9 @@ export class Board {
         this.selectedPixel.sprite.zIndex = oldZ || 0;
       }
 
-      let color = 0xffffff
-      if (pixel.getLuma() < 100) {
-        color = 0x000000;
-      }
-      console.log(pixel.getLuma());
-      const scale = this.container.scale;
       pixel.sprite.filters = [new OutlineFilter({
         thickness: 2,
-        color: color,
+        color: 0xffffff,
       })];
       oldZ = pixel.sprite.zIndex;
       pixel.sprite.zIndex = 100; // Arbitrary big number
@@ -75,12 +70,16 @@ export class Board {
     return pixels;
   }
 
+  resizeDefault() {
+    const board = this.container;
+    board.scale.set(2, 2)
+    board.x = (screen.width / 2) - (board.width / 2);
+    board.y = (screen.height / 2) - (board.height / 2);
+  }
+
 
   init(stage: Container<ContainerChild>, screen: Rectangle): Container<ContainerChild> {
     const board = new Container();
-
-    board.x = (screen.width / 2) - (board.width / 2);
-    board.y = (screen.height / 2) - (board.height / 2);
 
     board.on("wheel", (event: FederatedWheelEvent) => {
       const offsetX = (event.globalX - board.position.x) / board.width;

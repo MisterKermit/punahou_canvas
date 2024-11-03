@@ -36,6 +36,11 @@ export class Pixel {
     container.addChild(this.sprite);
   }
 
+  /**
+   * Gets the darkness of a color
+   * 0 is the darkest
+   * 255 is the lightest
+   */
   getLuma() {
     // https://stackoverflow.com/questions/12043187/how-to-check-if-hex-color-is-too-black
     const color = this.color;

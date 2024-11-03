@@ -21,7 +21,7 @@ module.exports = {
     ],
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js']
+    extensions: ['.tsx', '.ts', '.js', '.scss']
   },
   devServer: {
     static: path.join(__dirname, 'dist'),

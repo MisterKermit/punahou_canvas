@@ -1,0 +1,17 @@
+body {
+    margin: 0px;
+    height: 100%;
+}
+
+#bottom-bar {
+    position: absolute;
+    padding: 1vw;
+    z-index: 1;
+    background-color: white;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    width: 80%;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
