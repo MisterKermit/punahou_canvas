@@ -6,6 +6,7 @@ import {
 
 import { Board } from "./board";
 import { NetPixelMatrix } from "./pixel";
+import { Bar } from "./bar";
 
 (async () => {
   const root = document.getElementById("app");
@@ -37,8 +38,17 @@ import { NetPixelMatrix } from "./pixel";
     samplePixels.push(pixelList);
   }
 
+  const board = new Board(samplePixels, app);
 
-  const _board = new Board(samplePixels, app);
+  const eleBottomBar = document.createElement("div");
+  eleBottomBar.id = "bottom-bar";
+
+  const bar = new Bar(eleBottomBar, board.createSetColorCallback());
+
+  root.append(eleBottomBar);
+
+
+
 
 
   // board.setPixel({ color: 0x00ff00, user: null }, 2, 2)

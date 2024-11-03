@@ -70,6 +70,17 @@ export class Board {
     return pixels;
   }
 
+  public createSetColorCallback(): (num: number) => void {
+    return (color: number) => {
+      const pixel = this.selectedPixel
+      if (pixel == null) {
+        return
+      }
+      pixel.color = color;
+
+    }
+  }
+
   resizeDefault() {
     const board = this.container;
     board.scale.set(2, 2)
