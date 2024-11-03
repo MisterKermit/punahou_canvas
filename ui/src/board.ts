@@ -19,19 +19,28 @@ export class Board {
   private pixels: PixelMatrix;
   container: Container<ContainerChild>;
   selectedPixel: Pixel | null = null;
+  socket: WebSocket;
 
-  constructor(pixels: NetPixelMatrix, app: Application<Renderer>) {
+  constructor(
+    pixels: NetPixelMatrix,
+    app: Application<Renderer>,
+    socket: WebSocket
+  ) {
     this.container = this.init(app.stage, app.screen);
     this.pixels = this.netPixelsToPixels(pixels);
+    this.socket = socket;
     this.resizeDefault();
   }
 
+  /**
+   * Sets the pixel without sending it to the server
+   */
   public setPixel(netPixel: NetPixel, x: number, y: number): boolean {
     const pixel = this.pixels[y]?.[x];
     if (pixel === undefined) {
       return false;
     }
-    pixel.color = netPixel.color
+    pixel.color = netPixel.color;
     pixel.user = netPixel.user;
     return true;
   }
@@ -45,10 +54,12 @@ export class Board {
         this.selectedPixel.sprite.zIndex = oldZ || 0;
       }
 
-      pixel.sprite.filters = [new OutlineFilter({
-        thickness: 2,
-        color: 0xffffff,
-      })];
+      pixel.sprite.filters = [
+        new OutlineFilter({
+          thickness: 2,
+          color: 0xffffff,
+        }),
+      ];
       oldZ = pixel.sprite.zIndex;
       pixel.sprite.zIndex = 100; // Arbitrary big number
 
@@ -63,7 +74,16 @@ export class Board {
       const pixelList: Pixel[] = [];
       for (let j = 0; j < netInnerPixels.length; j++) {
         const netPixel = netInnerPixels[j];
-        pixelList.push(new Pixel(netPixel.color, j, i, this.container, netPixel.user, selectionCallback));
+        pixelList.push(
+          new Pixel(
+            netPixel.color,
+            j,
+            i,
+            this.container,
+            netPixel.user,
+            selectionCallback
+          )
+        );
       }
       pixels.push(pixelList);
     }
@@ -72,24 +92,36 @@ export class Board {
 
   public createSetColorCallback(): (num: number) => void {
     return (color: number) => {
-      const pixel = this.selectedPixel
+      const pixel = this.selectedPixel;
       if (pixel == null) {
-        return
+        return;
       }
       pixel.color = color;
+      const msg = {
+        type: "pixelColor",
+        pixelColor: color,
+        xPos: pixel.x,
+        yPos: pixel.y,
+      };
+      this.socket.send(JSON.stringify(msg));
+    };
+  }
 
-    }
+  private static sendBoardUpdate() {
+
   }
 
   resizeDefault() {
     const board = this.container;
-    board.scale.set(2, 2)
-    board.x = (screen.width / 2) - (board.width / 2);
-    board.y = (screen.height / 2) - (board.height / 2);
+    board.scale.set(2, 2);
+    board.x = screen.width / 2 - board.width / 2;
+    board.y = screen.height / 2 - board.height / 2;
   }
 
-
-  init(stage: Container<ContainerChild>, screen: Rectangle): Container<ContainerChild> {
+  init(
+    stage: Container<ContainerChild>,
+    screen: Rectangle
+  ): Container<ContainerChild> {
     const board = new Container();
 
     board.on("wheel", (event: FederatedWheelEvent) => {
@@ -99,20 +131,18 @@ export class Board {
       const toAdd = event.deltaY / 100;
       const x = Math.max(board.scale._x - toAdd, 0.5);
       const y = Math.max(board.scale._y - toAdd, 0.5);
-      board.scale.set(x, y)
+      board.scale.set(x, y);
 
       const newOffsetX = (event.globalX - board.position.x) / board.width;
       const newOffsetY = (event.globalY - board.position.y) / board.height;
       board.position.x += (newOffsetX - offsetX) * board.width;
       board.position.y += (newOffsetY - offsetY) * board.height;
-
     });
 
     stage.interactive = true;
     board.eventMode = "dynamic";
     board.cursor = "pointer";
     stage.hitArea = screen;
-
 
     stage.on("rightdown", onDragStart);
     stage.on("rightup", onDragEnd);
@@ -131,9 +161,11 @@ export class Board {
       stage.off("pointermove", onDragMove);
     }
 
-    document.addEventListener("keydown", event => {
+    document.addEventListener("keydown", (event) => {
       const pixel = this.selectedPixel;
-      if (pixel === null) { return; }
+      if (pixel === null) {
+        return;
+      }
       const key = event.key;
       let selected;
       if (key === "ArrowUp") {
@@ -147,12 +179,14 @@ export class Board {
       } else if (key == " ") {
         const pixel = this.selectedPixel;
         if (pixel === null) {
-          return
+          return;
         }
         pixel.sprite.tint = 0xffffff;
         pixel.selectCallback(pixel);
       }
-      if (selected === undefined) { return; }
+      if (selected === undefined) {
+        return;
+      }
       selected.selectCallback(selected);
       this.selectedPixel = selected;
     });
@@ -161,4 +195,3 @@ export class Board {
     return board;
   }
 }
-

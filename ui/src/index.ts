@@ -5,8 +5,10 @@ import {
 } from "pixi.js";
 
 import { Board } from "./board";
-import { NetPixelMatrix } from "./pixel";
+import { NetPixel, NetPixelMatrix } from "./pixel";
 import { Bar } from "./bar";
+
+const API_URL = "http://localhost:3000";
 
 (async () => {
   const root = document.getElementById("app");
@@ -14,8 +16,8 @@ import { Bar } from "./bar";
     throw Error("Root not found");
   }
 
-  const app = new Application();
 
+  const app = new Application();
   await app.init({ background: "#ffffff", resizeTo: window });
   app.canvas.addEventListener("contextmenu", (event) => {
     event.preventDefault();
@@ -23,22 +25,33 @@ import { Bar } from "./bar";
   app.canvas.style.position = "absolute";
 
 
-  // Send this over from the web later 
-  function randRange(min: number, max: number) {
-    return Math.random() * (max - min) + min;
-  }
+  const socket = new WebSocket("ws://localhost:3001");
 
-  const samplePixels: NetPixelMatrix = [];
-  const MATRIX_SIZE = 100; // This looks like the max reasonable dimension
-  for (let i = 0; i < MATRIX_SIZE; i++) {
-    const pixelList = [];
-    for (let j = 0; j < MATRIX_SIZE; j++) {
-      pixelList.push({ color: randRange(0x000000, 0xffffff), user: null });
+    interface PixelChange {
+        pixelColor: number,
+        xPos: number,
+        yPos: number,
     }
-    samplePixels.push(pixelList);
-  }
 
-  const board = new Board(samplePixels, app);
+  // Listen for messages
+  socket.addEventListener("message", (event) => {
+    const message: PixelChange = JSON.parse(event.data);
+    
+    const pixel: NetPixel = {
+      color: message.pixelColor,
+      user: null
+    }
+
+    board.setPixel(pixel, message.xPos, message.yPos)
+    console.log("Message from server ", event.data);
+  });
+
+  // board.setPixel({ color: 0x00ff00, user: null }, 2, 2)
+
+  let req = await fetch(API_URL + "/pixels");
+  let pixels = await req.json();
+
+  const board = new Board(pixels, app, socket);
 
   const eleBottomBar = document.createElement("div");
   eleBottomBar.id = "bottom-bar";
@@ -47,11 +60,6 @@ import { Bar } from "./bar";
 
   root.append(eleBottomBar);
 
-
-
-
-
-  // board.setPixel({ color: 0x00ff00, user: null }, 2, 2)
 
   root.appendChild(app.canvas);
 

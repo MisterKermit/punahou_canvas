@@ -15,6 +15,12 @@
   "author": "Alyx, MisterKermit",
   "license": "MIT",
   "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/ws": "^8.5.13",
+    "cors": "^2.8.5",
     "npm-run-all": "^4.1.5"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
   }
 }
