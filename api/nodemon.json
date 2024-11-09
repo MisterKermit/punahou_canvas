@@ -1,6 +1,0 @@
-{
-    "watch": ["src"],
-    "script": "npm run dev",
-    "ext": "ts,js,json",
-    "ignore": ["node_modules", "dist"]
-}
