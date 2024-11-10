@@ -45,6 +45,9 @@ export class Board {
     return true;
   }
 
+  /**
+  * Converts pixels that do not have a sprite to pixels that do have a sprite
+  */
   netPixelsToPixels(netPixels: NetPixelMatrix) {
     let oldZ: number | null = null;
     const selectionCallback = (pixel: Pixel) => {
@@ -54,10 +57,14 @@ export class Board {
         this.selectedPixel.sprite.zIndex = oldZ || 0;
       }
 
+      let color = 0xffffff;
+      if (pixel.color == 0xffffff) {
+        color = 0x000000;
+      }
       pixel.sprite.filters = [
         new OutlineFilter({
           thickness: 2,
-          color: 0xffffff,
+          color: color,
         }),
       ];
       oldZ = pixel.sprite.zIndex;
@@ -66,7 +73,6 @@ export class Board {
       this.selectedPixel = pixel;
     };
 
-    // Add user data later
     const pixels: PixelMatrix = [];
     // boomer loops because I couldn't get for..in to work
     for (let i = 0; i < netPixels.length; i++) {
@@ -90,6 +96,9 @@ export class Board {
     return pixels;
   }
 
+  /**
+  * This is for {@link Bar#paletteInit}
+  */
   public createSetColorCallback(): (num: number) => void {
     return (color: number) => {
       const pixel = this.selectedPixel;
@@ -97,6 +106,7 @@ export class Board {
         return;
       }
       pixel.color = color;
+
       const msg = {
         type: "pixelColor",
         pixelColor: color,
@@ -105,10 +115,6 @@ export class Board {
       };
       this.socket.send(JSON.stringify(msg));
     };
-  }
-
-  private static sendBoardUpdate() {
-
   }
 
   resizeDefault() {
@@ -124,6 +130,7 @@ export class Board {
   ): Container<ContainerChild> {
     const board = new Container();
 
+    // Add scroll wheel event
     board.on("wheel", (event: FederatedWheelEvent) => {
       const offsetX = (event.globalX - board.position.x) / board.width;
       const offsetY = (event.globalY - board.position.y) / board.height;
@@ -139,11 +146,13 @@ export class Board {
       board.position.y += (newOffsetY - offsetY) * board.height;
     });
 
+    // Event stuff
     stage.interactive = true;
     board.eventMode = "dynamic";
     board.cursor = "pointer";
     stage.hitArea = screen;
 
+    // Movement
     stage.on("rightdown", onDragStart);
     stage.on("rightup", onDragEnd);
     stage.on("rightupoutside", onDragEnd);
@@ -161,12 +170,21 @@ export class Board {
       stage.off("pointermove", onDragMove);
     }
 
+    // Keyboard stuff
     document.addEventListener("keydown", (event) => {
+      const key = event.key;
+      if (key === " ") {
+        this.resizeDefault();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      const key = event.key;
+
       const pixel = this.selectedPixel;
       if (pixel === null) {
         return;
       }
-      const key = event.key;
       let selected;
       if (key === "ArrowUp") {
         selected = this.pixels[pixel.y - 1]?.[pixel.x];
@@ -176,13 +194,6 @@ export class Board {
         selected = this.pixels[pixel.y][pixel.x - 1];
       } else if (key === "ArrowRight") {
         selected = this.pixels[pixel.y][pixel.x + 1];
-      } else if (key == " ") {
-        const pixel = this.selectedPixel;
-        if (pixel === null) {
-          return;
-        }
-        pixel.sprite.tint = 0xffffff;
-        pixel.selectCallback(pixel);
       }
       if (selected === undefined) {
         return;

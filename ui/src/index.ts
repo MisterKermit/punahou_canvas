@@ -5,38 +5,35 @@ import {
 } from "pixi.js";
 
 import { Board } from "./board";
-import { NetPixel, NetPixelMatrix } from "./pixel";
+import { NetPixel } from "./pixel";
 import { Bar } from "./bar";
+import { ChatWindow } from "./chat";
+import { PixelChange } from "./protocol";
 
 const API_URL = "http://localhost:3000";
+const WS_URL = "ws://localhost:3001";
 
 (async () => {
   const root = document.getElementById("app");
   if (root === null) {
-    throw Error("Root not found");
+    throw new Error("Root not found");
   }
 
-
   const app = new Application();
-  await app.init({ background: "#ffffff", resizeTo: window });
+  await app.init({ background: "#f8f8f8", resizeTo: window });
+  app.canvas.style.position = "absolute";
+
+  // context was never an option
   app.canvas.addEventListener("contextmenu", (event) => {
     event.preventDefault();
   });
-  app.canvas.style.position = "absolute";
 
-
-  const socket = new WebSocket("ws://localhost:3001");
-
-    interface PixelChange {
-        pixelColor: number,
-        xPos: number,
-        yPos: number,
-    }
+  const socket = new WebSocket(WS_URL);
 
   // Listen for messages
   socket.addEventListener("message", (event) => {
     const message: PixelChange = JSON.parse(event.data);
-    
+
     const pixel: NetPixel = {
       color: message.pixelColor,
       user: null
@@ -46,20 +43,31 @@ const API_URL = "http://localhost:3000";
     console.log("Message from server ", event.data);
   });
 
-  // board.setPixel({ color: 0x00ff00, user: null }, 2, 2)
+  // Create chat window
+  const eleChatWindow = document.createElement("div");
+  eleChatWindow.id = "chat";
+  const chatWindow = new ChatWindow(eleChatWindow, "bob");
+  root.appendChild(eleChatWindow);
 
+  // Create board
   let req = await fetch(API_URL + "/pixels");
   let pixels = await req.json();
-
   const board = new Board(pixels, app, socket);
 
+  // Create bottom bar
   const eleBottomBar = document.createElement("div");
   eleBottomBar.id = "bottom-bar";
 
-  const bar = new Bar(eleBottomBar, board.createSetColorCallback());
-
-  root.append(eleBottomBar);
-
+  const sendMessageCallback = (chatEle: HTMLInputElement) => {
+    const trimmed = chatEle.value.trim();
+    if (trimmed.length === 0) {
+      return
+    }
+    chatWindow.sendMessage(trimmed);
+    chatEle.value = "";
+  };
+  new Bar(eleBottomBar, board.createSetColorCallback(), sendMessageCallback);
+  root.appendChild(eleBottomBar);
 
   root.appendChild(app.canvas);
 

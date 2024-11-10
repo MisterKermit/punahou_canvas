@@ -1,5 +1,3 @@
-//   { user: null, color: 0xffffff },
-
 import { Container, FederatedPointerEvent, Graphics } from "pixi.js";
 
 export class Pixel {
@@ -13,7 +11,7 @@ export class Pixel {
   }
 
   sprite: Graphics;
-  /* If it is null, it means the server placed the pixel */
+  /** If it is null, it means the server placed the pixel */
   user: string | null;
   public selectCallback: (pixel: Pixel) => void;
   // Storing the locations is a necessary evil
@@ -21,8 +19,12 @@ export class Pixel {
   public y: number;
 
   /**
+  * @param color the color of the pixel
   * @param x index of the inner array
   * @param y index of the outer array
+  * @param container the container this pixel is in
+  * @param user the user or uuid
+  * @param selectCallback the callback that gets called whenever it gets clicked
   */
   constructor(color: number, x: number, y: number, container: Container, user: string | null, selectCallback: (pixel: Pixel) => void) {
     this.x = x;

@@ -24,7 +24,7 @@ module.exports = {
     extensions: ['.tsx', '.ts', '.js', '.scss']
   },
   devServer: {
-    static: path.join(__dirname, 'dist'),
+    static: path.join(__dirname, 'public'),
     port: 8080
   }
 

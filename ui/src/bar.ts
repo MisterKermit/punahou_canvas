@@ -1,17 +1,79 @@
-
 export class Bar {
   private root: HTMLDivElement
-  constructor(root: HTMLDivElement, setColorCallback: (color: number) => void) {
+  constructor(root: HTMLDivElement, setColorCallback: (color: number) => void, sendMessageCallback: (chatEle: HTMLInputElement) => void) {
     this.root = root;
-    this.init(root, setColorCallback);
+    this.paletteInit(setColorCallback);
+    this.settingsInit(sendMessageCallback);
   }
 
-  init(root: HTMLDivElement, setColorCallback: (color: number) => void) {
+  private settingsInit(sendMessage: (chatEle: HTMLInputElement) => void) {
+    const settings = document.createElement("div");
+    settings.classList.add("settings");
+
+    const addIcon = (label: string, src: string, callback: (ev: MouseEvent) => void) => {
+      const icon = document.createElement("button");
+      icon.classList.add(label);
+      icon.classList.add("icon");
+
+      const inner = document.createElement("img");
+      inner.draggable = false;
+      inner.src = src;
+      icon.appendChild(inner);
+
+      icon.addEventListener("click", callback);
+      settings.appendChild(icon);
+    };
+
+    // Chat input box
+    const chatInput = document.createElement("input");
+    chatInput.classList.add("chat-input");
+    chatInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        sendMessage(chatInput);
+      }
+    });
+
+    addIcon("login-button", "assets/right-to-bracket-solid.svg", (_) => {
+      location.href = "/login";
+    });
+
+    // Modal stuff
+    const modal = document.createElement("dialog");
+
+    modal.innerHTML = `
+      <p>This is a recreation of r/place for punahou students</p>
+      <br/>
+      <p><b>TODO: Make this more descriptive</b></p>
+    `;
+    const closeButton = document.createElement("button");
+    closeButton.innerText = "Close";
+    closeButton.addEventListener("click", () => modal.close());
+    modal.appendChild(closeButton);
+
+    this.root.appendChild(modal);
+
+    // Info button
+    addIcon("info-button", "assets/info-solid.svg", () => {
+      modal.showModal();
+    });
+
+    // Send chat button
+    addIcon("chat-button", "assets/comment-solid.svg", () => {
+      sendMessage(chatInput);
+    });
+
+    settings.appendChild(chatInput);
+
+    this.root.appendChild(settings);
+  }
+
+  private paletteInit(setColorCallback: (color: number) => void) {
     const palette = document.createElement("div");
-    palette.id = "palette";
+    palette.classList.add("palette");
 
     const colors = document.createElement("div");
-    colors.id = "colors";
+    colors.classList.add("colors");
     palette.appendChild(colors);
 
     const rgb = (r: number, g: number, b: number) => {
@@ -44,7 +106,6 @@ export class Bar {
       rgb(255, 230, 0),
       rgb(87, 52, 0),
     ];
-    console.log(paletteColors);
 
     for (const i in paletteColors) {
       const paletteColor = paletteColors[i];
@@ -67,7 +128,6 @@ export class Bar {
 
       colors.appendChild(color)
     }
-    root.appendChild(palette);
-
+    this.root.appendChild(palette);
   }
 }
