@@ -11,10 +11,6 @@ export type NetPixelMatrix = NetPixel[][];
 
 export function generatePixels(): NetPixelMatrix {
   // Send this over from the web later
-  function randRange(min: number, max: number) {
-    return Math.round(Math.random() * (max - min) + min);
-  }
-
   const samplePixels: NetPixelMatrix = [];
   const MATRIX_SIZE = 100; // This looks like the max reasonable dimension
   for (let i = 0; i < MATRIX_SIZE; i++) {
