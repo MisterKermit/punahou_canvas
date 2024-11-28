@@ -19,23 +19,40 @@ server.on("connection", function(socket) {
   // When you receive a message, send that message to every socket.
   socket.on("message", function(msg) {
 
+    interface Message {
+      type: string
+    }
+
     interface PixelChange {
+      type: string,
       pixelColor: number,
       xPos: number,
       yPos: number,
     }
 
-    let req = msg.toString();
-    let pixel: PixelChange = JSON.parse(req)
-
-    const netPixel: NetPixel = {
-      color: pixel.pixelColor,
-      user: null
+    interface ChatMessage {
+      type: string,
+      message: string
     }
 
-    pixels[pixel.xPos][pixel.yPos] = netPixel;
+    let req = msg.toString();
+    let raw: Message = JSON.parse(req)
+    if (raw.type == "pixelColor") {
+      const pixel = raw as PixelChange;
+      
+      const netPixel: NetPixel = {
+        color: pixel.pixelColor,
+        user: null
+      }
+      pixels[pixel.yPos][pixel.xPos] = netPixel;
+    } else if (raw.type == "chatMessage") {
+      const newMessage = raw as ChatMessage;
+    }
+    
+    
 
-    sockets.forEach((s) => s.send(JSON.stringify(pixel)));
+
+    sockets.forEach((s) => s.send(JSON.stringify(raw)));
   });
 
   // When a socket closes, or disconnects, remove it from the array.

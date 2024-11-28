@@ -32,21 +32,40 @@ const WS_URL = "ws://localhost:3001";
 
   // Listen for messages
   socket.addEventListener("message", (event) => {
-    const message: PixelChange = JSON.parse(event.data);
-
-    const pixel: NetPixel = {
-      color: message.pixelColor,
-      user: null
+    interface Message {
+      type: string
     }
 
-    board.setPixel(pixel, message.xPos, message.yPos)
+    interface ChatMessage {
+      type: string,
+      message: string
+    }
+
+
+    let msg: Message = JSON.parse(event.data)
+
+    if (msg.type == "pixelColor") {
+      const message: PixelChange = JSON.parse(event.data);
+
+      const pixel: NetPixel = {
+        color: message.pixelColor,
+        user: null
+      }
+
+      board.setPixel(pixel, message.xPos, message.yPos)
+    } else if (msg.type == "chatMessage") {
+      const newMessage = msg as ChatMessage;
+
+      chatWindow.receiveMessage('user', newMessage.message);
+    }
+
     console.log("Message from server ", event.data);
   });
 
   // Create chat window
   const eleChatWindow = document.createElement("div");
   eleChatWindow.id = "chat";
-  const chatWindow = new ChatWindow(eleChatWindow, "bob");
+  const chatWindow = new ChatWindow(eleChatWindow, "bob", socket);
   root.appendChild(eleChatWindow);
 
   // Create board

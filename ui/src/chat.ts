@@ -1,12 +1,18 @@
 export class ChatWindow {
   root: HTMLDivElement;
   username: string;
-  constructor(root: HTMLDivElement, username: string) {
+  socket: WebSocket; 
+  // add a socket object here
+  constructor(root: HTMLDivElement, username: string, socket: WebSocket) {
     this.root = root;
     this.username = username;
+    this.socket = socket;
     this.init();
   }
 
+  /**
+   * Adds a message to the chat window
+   */
   public receiveMessage(username: string, msg: string) {
     const p = document.createElement("p");
     p.innerHTML = `<b>${username}></b> ${msg}`;
@@ -30,9 +36,19 @@ export class ChatWindow {
     this.root.prepend(p);
   }
 
+
+  /**
+   * Sends a message into the chat
+   */
   public sendMessage(msg: string) {
     this.receiveMessage(this.username, msg);
+    const message = {
+      type: "chatMessage",
+      message: msg
+    };
+    this.socket.send(JSON.stringify(message));
   }
+
 
   private init() {
     document.addEventListener("keydown", (event: KeyboardEvent) => {

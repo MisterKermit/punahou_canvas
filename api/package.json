@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "nodemon --watch './src/*' -e ts,js,json --exec 'tsc && node ./dist/index.js'"
+    "dev": "nodemon --watch ./src/* -e ts,js,json --exec \"npx tsc && node ./dist/index.js\""
   },
   "license": "MIT",
   "devDependencies": {
