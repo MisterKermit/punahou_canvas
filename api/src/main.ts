@@ -4,16 +4,11 @@ import cors from "cors";
 import { Message, NetPixel, NetPixelMatrix, PixelChange, ChatMessage } from "../../lib";
 import { generatePixels } from "./util";
 import { Client } from "pg";
+import { loadEnv as loadAppEnv } from "./env";
 
 const app: Express = express();
-const port = process.env.PORT || 3000;
-const client = new Client({
-  user: "postgres",
-  host: "172.18.0.2",
-  // database: "users",
-  password: "example",
-  port: 3002,
-});
+const env = loadAppEnv();
+const client = new Client(env.db);
 
 async function databaseStuff(client: Client): Promise<string> {
   // await client.connect();
@@ -23,14 +18,10 @@ async function databaseStuff(client: Client): Promise<string> {
   return "I got:" + result.rows.toString()
 }
 
-const server = new WebSocket.Server({
-  port: 3001,
-});
+const server = new WebSocket.Server({ port: env.wsPort });
 
 app.use(
-  cors({
-    origin: "http://localhost:8080",
-  })
+  cors({ origin: env.corsDomain })
 );
 
 app.get("/", async (_req: Request, res: Response) => {
@@ -75,6 +66,6 @@ server.on("connection", function(socket) {
   });
 });
 
-app.listen(port, () => {
-  console.log(`Server starting at http://localhost:${port}`);
+app.listen(env.appPort, () => {
+  console.log(`Server starting at ${env.corsDomain}`);
 });
