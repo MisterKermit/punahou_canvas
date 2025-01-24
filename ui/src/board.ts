@@ -8,8 +8,9 @@ import {
   Renderer,
 } from "pixi.js";
 
-import { NetPixel, NetPixelMatrix, Pixel, PixelMatrix } from "./pixel";
+import { Pixel, PixelMatrix } from "./pixel";
 import { OutlineFilter } from "pixi-filters";
+import { NetPixel, NetPixelMatrix, PixelChange } from "../../lib";
 
 /**
  * Manages the pixel board and all it's pixels.
@@ -107,7 +108,7 @@ export class Board {
       }
       pixel.color = color;
 
-      const msg = {
+      const msg: PixelChange = {
         type: "pixelColor",
         pixelColor: color,
         xPos: pixel.x,

@@ -1,7 +1,9 @@
+import { ChatMessage } from "../../lib";
+
 export class ChatWindow {
   root: HTMLDivElement;
   username: string;
-  socket: WebSocket; 
+  socket: WebSocket;
   // add a socket object here
   constructor(root: HTMLDivElement, username: string, socket: WebSocket) {
     this.root = root;
@@ -42,7 +44,7 @@ export class ChatWindow {
    */
   public sendMessage(msg: string) {
     this.receiveMessage(this.username, msg);
-    const message = {
+    const message: ChatMessage = {
       type: "chatMessage",
       message: msg
     };

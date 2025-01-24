@@ -1,7 +1,8 @@
 import express, { Express, Request, Response } from "express";
 import WebSocket from "ws";
 import cors from "cors";
-import { generatePixels, NetPixel, NetPixelMatrix } from "./util";
+import { Message, NetPixel, NetPixelMatrix, PixelChange, ChatMessage } from "../../lib";
+import { generatePixels } from "./util";
 import { Client } from "pg";
 
 const app: Express = express();
@@ -21,7 +22,6 @@ async function databaseStuff(client: Client): Promise<string> {
   const result = await client.query("SELECT 1+1 AS result;");
   return "I got:" + result.rows.toString()
 }
-
 
 const server = new WebSocket.Server({
   port: 3001,
@@ -46,26 +46,11 @@ app.get("/pixels", (_req: Request, res: Response) => {
 const pixels: NetPixelMatrix = generatePixels();
 
 let sockets: WebSocket[] = [];
-server.on("connection", function (socket) {
+server.on("connection", function(socket) {
   sockets.push(socket);
 
   // When you receive a message, send that message to every socket.
-  socket.on("message", function (msg) {
-    interface Message {
-      type: string;
-    }
-
-    interface PixelChange {
-      type: string;
-      pixelColor: number;
-      xPos: number;
-      yPos: number;
-    }
-
-    interface ChatMessage {
-      type: string;
-      message: string;
-    }
+  socket.on("message", function(msg) {
 
     let req = msg.toString();
     let raw: Message = JSON.parse(req);
@@ -85,7 +70,7 @@ server.on("connection", function (socket) {
   });
 
   // When a socket closes, or disconnects, remove it from the array.
-  socket.on("close", function () {
+  socket.on("close", function() {
     sockets = sockets.filter((s) => s !== socket);
   });
 });

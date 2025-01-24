@@ -5,10 +5,9 @@ import {
 } from "pixi.js";
 
 import { Board } from "./board";
-import { NetPixel } from "./pixel";
 import { Bar } from "./bar";
 import { ChatWindow } from "./chat";
-import { PixelChange } from "./protocol";
+import { ChatMessage, Message, NetPixel, NetPixelMatrix, PixelChange } from "../../lib";
 
 const API_URL = "http://localhost:3000";
 const WS_URL = "ws://localhost:3001";
@@ -32,16 +31,6 @@ const WS_URL = "ws://localhost:3001";
 
   // Listen for messages
   socket.addEventListener("message", (event) => {
-    interface Message {
-      type: string
-    }
-
-    interface ChatMessage {
-      type: string,
-      message: string
-    }
-
-
     let msg: Message = JSON.parse(event.data)
 
     if (msg.type == "pixelColor") {
@@ -70,7 +59,7 @@ const WS_URL = "ws://localhost:3001";
 
   // Create board
   let req = await fetch(API_URL + "/pixels");
-  let pixels = await req.json();
+  let pixels: NetPixelMatrix = await req.json();
   const board = new Board(pixels, app, socket);
 
   // Create bottom bar

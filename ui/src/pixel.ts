@@ -69,15 +69,6 @@ export class Pixel {
 
 }
 
-/*
- * A pixel that is able to be serialized and sent through the internet
- */
-export interface NetPixel {
-  color: number,
-  user: string | null,
-};
-
 export type PixelMatrix = Pixel[][];
-export type NetPixelMatrix = NetPixel[][];
 
 
