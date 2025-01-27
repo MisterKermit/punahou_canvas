@@ -3,16 +3,17 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "nodemon --watch ./src/* -e ts,js,json --exec \"npx tsc -b && node ./dist/main.js\""
+    "dev": "nodemon --watch ./src/* -e ts,js,json --exec \"npx tsc -b && node ./dist/main.js\"",
+    "start": "npx tsc -b && node ./dist/main.js"
   },
   "license": "MIT",
   "devDependencies": {
     "@types/express": "^5.0.0",
     "@types/node": "^22.8.6",
-    "nodemon": "^3.1.7",
-    "typescript": "^5.6.3"
+    "nodemon": "^3.1.7"
   },
   "dependencies": {
+    "typescript": "^5.6.3",
     "@types/pg": "^8.11.10",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
