@@ -10,8 +10,8 @@ const app: Express = express();
 const env = loadAppEnv();
 const client = new Client(env.db);
 
+
 async function databaseStuff(client: Client): Promise<string> {
-  // await client.connect();
 
   console.log("connected!");
   const result = await client.query("SELECT 1+1 AS result;");
@@ -20,13 +20,14 @@ async function databaseStuff(client: Client): Promise<string> {
 
 const server = new WebSocket.Server({ port: env.wsPort });
 
+
 app.use(
   cors({ origin: env.corsDomain })
 );
 
 app.get("/", async (_req: Request, res: Response) => {
   const dbRes = await databaseStuff(client);
-  res.send(dbRes)
+  res.send(dbRes);
 });
 
 
@@ -66,6 +67,7 @@ server.on("connection", function(socket) {
   });
 });
 
-app.listen(env.appPort, () => {
+app.listen(env.appPort, async () => {
   console.log(`Server starting at ${env.corsDomain}`);
+  await client.connect();
 });

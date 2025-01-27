@@ -1,8 +1,5 @@
 # Use postgres/example user/password credentials
-version: '3.9'
-
 services:
-
   db:
     image: postgres
     restart: always
@@ -16,6 +13,8 @@ services:
     #      size: 134217728 # 128*2^20 bytes = 128Mb
     environment:
       POSTGRES_PASSWORD: example
+    ports:
+      - "5432:5432"
 
   adminer:
     image: adminer
