@@ -3,20 +3,20 @@ import WebSocket from "ws";
 import cors from "cors";
 import { Message, NetPixel, NetPixelMatrix, PixelChange, ChatMessage } from "../../lib";
 import { generatePixels } from "./util";
-import { Client } from "pg";
+// import { Client } from "pg";
 import { loadEnv as loadAppEnv } from "./env";
 
 const app: Express = express();
 const env = loadAppEnv();
-const client = new Client(env.db);
+// const client = new Client(env.db);
 
 
-async function databaseStuff(client: Client): Promise<string> {
+// async function databaseStuff(client: Client): Promise<string> {
 
-  console.log("connected!");
-  const result = await client.query("SELECT 1+1 AS result;");
-  return "I got:" + result.rows.toString()
-}
+//   console.log("connected!");
+//   const result = await client.query("SELECT 1+1 AS result;");
+//   return "I got:" + result.rows.toString()
+// }
 
 const server = new WebSocket.Server({ port: env.wsPort });
 
@@ -25,10 +25,10 @@ app.use(
   cors({ origin: env.corsDomain })
 );
 
-app.get("/", async (_req: Request, res: Response) => {
-  const dbRes = await databaseStuff(client);
-  res.send(dbRes);
-});
+// app.get("/", async (_req: Request, res: Response) => {
+//   const dbRes = await databaseStuff(client);
+//   res.send(dbRes);
+// });
 
 
 app.get("/pixels", (_req: Request, res: Response) => {
@@ -69,5 +69,4 @@ server.on("connection", function(socket) {
 
 app.listen(env.appPort, async () => {
   console.log(`Server starting at ${env.corsDomain}`);
-  await client.connect();
 });

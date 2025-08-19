@@ -4,13 +4,13 @@ export interface EnvSchema {
   corsDomain: string
   appPort: number
   wsPort: number
-  db: {
-    user: string
-    host: string
-    password: string
-    port: number
-    database: string
-  }
+  // db: {
+  //   user: string
+  //   host: string
+  //   password: string
+  //   port: number
+  //   database: string
+  // }
 }
 
 function getEnv(key: string): string {
@@ -36,13 +36,13 @@ export function loadEnv() {
     corsDomain: getEnv("CORS_DOMAIN"),
     appPort: getNum("APP_PORT"),
     wsPort: getNum("WS_PORT"),
-    db: {
-      user: getEnv("DB_USER"),
-      host: getEnv("DB_HOST"),
-      password: getEnv("DB_PASSWORD"),
-      port: getNum("DB_PORT"),
-      database: getEnv("DB_NAME")
-    }
+    // db: {
+    //   user: getEnv("DB_USER"),
+    //   host: getEnv("DB_HOST"),
+    //   password: getEnv("DB_PASSWORD"),
+    //   port: getNum("DB_PORT"),
+    //   database: getEnv("DB_NAME")
+    // }
   };
   return env
 }
